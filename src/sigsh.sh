@@ -67,16 +67,16 @@ XTRACE=0
 # inputs   : msg
 
 error() {
-	local msg="$@"
+    local msg="$@"
 
-	echo "${PROGNAME}: $msg" >&2
+    echo "${PROGNAME}: $msg" >&2
 }
 
 # function : usage
 # purpose  : print usage statement
 
 usage() {
-	cat <<EOH
+    cat <<EOH
 Usage: ${PROGNAME} [-x] [-f certs] [-p program]
          -f certs    Read certs to trust from this file.
          -p program  Pipe commands into 'program'.
@@ -92,13 +92,13 @@ EOH
 # returns  : 0 on success, 1 on invalid input
 
 verifyArg() {
-	local arg="${1}"
+    local arg="${1}"
 
-	if expr "${arg}" : "[a-zA-Z0-9/_.-]*$" >/dev/null 2>&1 ; then
-		echo "${arg}"
+    if expr "${arg}" : "[a-zA-Z0-9/_.-]*$" >/dev/null 2>&1 ; then
+        echo "${arg}"
         return 0
-	fi
-	error "Argument must match ^[a-zA-Z0-9/_.-]*$."
+    fi
+    error "Argument must match ^[a-zA-Z0-9/_.-]*$."
     return 1
 }
 
@@ -107,11 +107,11 @@ verifyArg() {
 # inputs   : a string
 
 xtrace() {
-	local msg="$1"
+    local msg="$1"
 
-	if [ ${XTRACE} -gt 0 ]; then
-		echo "+ ${msg}" >&2
-	fi
+    if [ ${XTRACE} -gt 0 ]; then
+        echo "+ ${msg}" >&2
+    fi
 }
 
 ###
@@ -119,38 +119,38 @@ xtrace() {
 ###
 
 while getopts 'f:p:x' opt; do
-	case ${opt} in
-		f)
-			CERTS=$(verifyArg "${OPTARG}")
+    case ${opt} in
+        f)
+            CERTS=$(verifyArg "${OPTARG}")
             [ $? -ne 0 ] && exit 1
-		;;
-		p)
-			PROGRAM=$(verifyArg "${OPTARG}")
+        ;;
+        p)
+            PROGRAM=$(verifyArg "${OPTARG}")
             [ $? -ne 0 ] && exit 1
-		;;
-		x)
-			XTRACE=1
-		;;
-		*)
-			usage
-			exit 1
-			# NOTREACHED
-		;;
-	esac
+        ;;
+        x)
+            XTRACE=1
+        ;;
+        *)
+            usage
+            exit 1
+            # NOTREACHED
+        ;;
+    esac
 done
 shift $(($OPTIND - 1))
 
 if [ $# -gt 0 ]; then
-	usage
-	exit 1
-	# NOTREACHED
+    usage
+    exit 1
+    # NOTREACHED
 fi
 
 verify="${SSL_VERIFY} ${CERTS}"
 xtrace "${verify}"
 
 if [ ${XTRACE} -eq 0 ]; then
-	verify="${verify} 2>/dev/null"
+    verify="${verify} 2>/dev/null"
 fi
 
 # We could just do something like
@@ -166,8 +166,8 @@ fi
 
 output=$(eval ${verify})
 if [ $? -gt 0 ]; then
-	echo "Unable to verify given input." >&2
-	exit 127
+    echo "Unable to verify given input." >&2
+    exit 127
 fi
 
 IFS='
@@ -175,10 +175,10 @@ IFS='
 # We only loop through this line by line if we're tracing.  Otherwise,
 # this would be a significant performance penalty for large input scripts.
 if [ ${XTRACE} -gt 0 ]; then
-	for line in ${output}; do
-		xtrace "${line}"
-		echo "${line}" | tr -d '\r'
-	done | ${PROGRAM}
+    for line in ${output}; do
+        xtrace "${line}"
+        echo "${line}" | tr -d '\r'
+    done | ${PROGRAM}
 else
-	echo "${output}" | tr -d '\r' | ${PROGRAM}
+    echo "${output}" | tr -d '\r' | ${PROGRAM}
 fi
